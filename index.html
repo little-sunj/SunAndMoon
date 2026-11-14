@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="ko" data-phase="day" style="--turn: 0">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>소백</title>
+  <meta name="description" content="해와 달이 된 오누이, 그 뒤 천 년을 홀로 밤을 지켜 온 달지기 소백의 세계관 홈페이지">
+  <meta name="theme-color" content="#12344a">
+
+  <!-- 링크를 공유할 때 뜨는 미리보기. 사이트 주소가 정해지면 og:image를 전체 주소로 바꿔 주세요. -->
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="소백">
+  <meta property="og:title" content="소백 — 천 년째 밤을 지키는 달지기">
+  <meta property="og:description" content="해와 달이 된 오누이, 그 뒤 천 년을 홀로 밤을 지켜 온 달지기 소백의 세계관 홈페이지">
+  <meta property="og:image" content="assets/images/og-image.jpg">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="보름달 아래 밤의 도시와 은발의 소백">
+  <meta name="twitter:card" content="summary_large_image">
+
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="apple-touch-icon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500&family=Noto+Serif+KR:wght@500;700&display=swap" rel="stylesheet">
+  <!-- 첫 화면에 바로 보이는 그림은 스크립트보다 먼저 받기 시작합니다. -->
+  <link rel="preload" as="image" href="assets/images/scenery/sky-day.webp" fetchpriority="high">
+  <link rel="preload" as="image" href="assets/images/sun.webp">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/ui.css">
+</head>
+<body>
+  <main class="scene" id="scene" inert>
+    <!-- 레이어 순서가 곧 앞뒤 순서입니다. 아래로 갈수록 화면 앞쪽이에요. -->
+    <div class="sky sky--day" data-asset="skyDay" aria-hidden="true"></div>
+    <div class="sky sky--night" data-asset="skyNight" aria-hidden="true"></div>
+
+    <div class="stage">
+      <div class="orbit">
+        <div class="sun-halo" aria-hidden="true">
+          <i class="sun-halo__glow"></i>
+          <i class="sun-halo__rays"></i>
+          <i class="sun-halo__rays sun-halo__rays--short"></i>
+        </div>
+        <button class="orb orb--sun" id="sun" data-asset="sun" data-open="yeomhee" type="button"
+          aria-label="해지기 염희 소개 보기" title="해지기 염희"></button>
+        <button class="orb orb--moon" id="moon" data-asset="moon" data-open="soback" type="button"
+          aria-label="달지기 소백 소개 보기" title="달지기 소백" inert></button>
+      </div>
+      <div class="layer layer--far" data-asset="farPeaks" aria-hidden="true"></div>
+      <div class="layer layer--peaks" data-asset="mainPeaks" aria-hidden="true"></div>
+      <div class="layer layer--clouds" data-asset="midClouds" aria-hidden="true"></div>
+      <div class="layer layer--city" data-asset="city" aria-hidden="true"></div>
+      <canvas class="lights" id="lights" aria-hidden="true"></canvas>
+      <div class="layer layer--front" data-asset="frontClouds" aria-hidden="true"></div>
+    </div>
+
+    <!-- 화면에는 보이지 않는 페이지 제목(화면낭독기·검색용) -->
+    <h1 class="visually-hidden">소백</h1>
+
+    <nav class="menu" aria-label="둘러보기">
+      <button type="button" data-open="world">세계관</button>
+      <button type="button" data-open="soback">인물</button>
+      <button type="button" data-open="saeki">삿된 것</button>
+    </nav>
+
+    <button class="toggle" id="toggle" type="button">
+      <!-- 낮에는 달(밤으로), 밤에는 해(낮으로) 아이콘이 보입니다. -->
+      <svg class="toggle__icon toggle__icon--moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"/></svg>
+      <svg class="toggle__icon toggle__icon--sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2.5v2M12 19.5v2M2.5 12h2M19.5 12h2M5.3 5.3l1.4 1.4M17.3 17.3l1.4 1.4M5.3 18.7l1.4-1.4M17.3 6.7l1.4-1.4"/></svg>
+      <span class="visually-hidden" id="toggle-label">밤으로 바꾸기</span>
+    </button>
+
+    <!-- 음악: 왼쪽 위에 재생 버튼과 지금 곡 제목이 늘 보이고, 제목을 누르면 곡 목록이 펼쳐집니다. -->
+    <div class="music" id="music" data-state="paused">
+      <div class="music__bar">
+        <button class="music__play" id="music-play" type="button" aria-label="재생">
+          <svg class="icon-play" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.5v13l10-6.5z"/></svg>
+          <svg class="icon-pause" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 5h3.5v14H7zM13.5 5H17v14h-3.5z"/></svg>
+        </button>
+        <button class="music__now" id="music-button" type="button" aria-expanded="false" aria-controls="playlist">
+          <span class="music__text">
+            <span class="music__title" id="music-title"></span>
+            <span class="music__progress" aria-hidden="true"><i></i></span>
+          </span>
+          <span class="visually-hidden">곡 목록</span>
+          <svg class="music__chevron" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
+        </button>
+      </div>
+      <div class="playlist" id="playlist" hidden>
+        <p class="playlist__head"><span>재생 목록</span><span id="music-count"></span></p>
+        <ol class="playlist__list" id="music-list"></ol>
+      </div>
+    </div>
+  </main>
+
+  <dialog class="sheet" id="sheet" aria-labelledby="sheet-title">
+    <div class="sheet__art" id="sheet-art"></div>
+    <section class="sheet__panel">
+      <button class="sheet__close icon-button" id="sheet-close" type="button" aria-label="닫기">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>
+      </button>
+      <div class="sheet__scroll" id="sheet-scroll">
+        <div class="sheet__body" id="sheet-body"></div>
+      </div>
+    </section>
+  </dialog>
+
+  <div class="gate" id="gate">
+    <div class="gate__inner">
+      <!-- 제목은 화면에 보이지 않고 화면낭독기에만 읽힙니다. -->
+      <h2 class="visually-hidden">소백</h2>
+      <p class="gate__line" id="gate-line"></p>
+      <!-- 화면 어디를 눌러도 들어가며, 음악이 함께 켜집니다. -->
+      <button class="gate__enter" id="enter" type="button"></button>
+    </div>
+  </div>
+
+  <script src="js/content.js"></script>
+  <script src="js/placeholders.js"></script>
+  <script src="js/city-lights.js"></script>
+  <script src="js/scene.js"></script>
+  <script src="js/ui.js"></script>
+</body>
+</html>
