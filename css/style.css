@@ -240,6 +240,21 @@ body {
   filter: drop-shadow(0 var(--edge-drop) var(--edge-shadow) rgb(6 16 30 / .45));
 }
 
+/* 밤에는 금선을 절반쯤 연하게: 건물 구분은 안개와 명암이 맡고, 불빛과 삿된 것이 더 잘 보이게 합니다. */
+[data-phase="night"] .piece.has-edge {
+  filter:
+    drop-shadow(0 0 var(--edge-line) rgb(226 178 92 / .45))
+    drop-shadow(0 var(--edge-drop) var(--edge-shadow) rgb(6 16 30 / .45));
+}
+[data-phase="night"] .piece.has-edge--line {
+  filter:
+    drop-shadow(0 0 var(--edge-line) rgb(226 178 92 / .3))
+    drop-shadow(0 var(--edge-drop) var(--edge-shadow) rgb(6 16 30 / .3));
+}
+[data-phase="night"] .piece.has-edge--shadow {
+  filter: drop-shadow(0 var(--edge-drop) var(--edge-shadow) rgb(6 16 30 / .45));
+}
+
 /* 도시 안개: 줄 사이에 하늘빛 띠를 깔아, 뒤에 있는 건물일수록 여러 겹 덮여 흐려지게 합니다.
    낮 안개(::before)와 밤 안개(::after)를 겹쳐 두고, 도시가 낮↔밤으로 바뀌는 구간에 맞춰 서로 바꿔 보여 줍니다.
    색은 --mist-day / --mist-night, 진하기는 scene.js의 mist 값(밤은 --mist-night-k를 곱한 값)으로 조절합니다. */
@@ -285,6 +300,17 @@ body {
   transition: opacity calc(var(--dur) * var(--swap-len)) ease-in-out calc(var(--dur) * var(--swap-start));
 }
 [data-phase="night"] .piece.is-night-only { opacity: 1; }
+/* 발밑은 서서히 투명하게 해서 안개 속에서 몸이 솟아나는 것처럼 보이게 하고,
+   둘레에 아주 옅은 푸른 기운을 두릅니다. */
+.piece.is-night-only {
+  -webkit-mask-image: linear-gradient(to top, transparent 0, #000 22%);
+  mask-image: linear-gradient(to top, transparent 0, #000 22%);
+  filter: drop-shadow(0 0 calc(var(--stage-w) * .006) rgb(150 180 230 / .35));
+}
+.piece.is-night-only.is-rising {
+  -webkit-mask-image: linear-gradient(to top, transparent 0, #000 35%);
+  mask-image: linear-gradient(to top, transparent 0, #000 35%);
+}
 
 /* 도시 불빛: 무대의 도시 영역만 덮어 그리는 면적을 줄였습니다. */
 .lights {
