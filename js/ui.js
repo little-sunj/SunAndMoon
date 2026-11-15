@@ -426,10 +426,37 @@
     gate.classList.add('is-leaving');
     scene.inert = false;
     if (fromKeyboard) document.getElementById('toggle').focus({ preventScroll: true });
+    showToggleHint();
     await wait(1100);
     gate.remove();
     window.Scene.syncThemeColor();
   }
+
+  /* 낮/밤 버튼 안내: 들어온 뒤 금빛 물결이 퍼지고 아래 글귀가 깜박이다 6초 안에 사라집니다.
+     버튼을 한 번이라도 눌러 본 방문자에게는 다시 보이지 않습니다. */
+  const HINT_KEY = 'sunandmoon.toggleHintSeen';
+  const toggleEl = document.getElementById('toggle');
+  const hintEl = document.getElementById('toggle-hint');
+  let hintTimer = 0;
+  const hintSeen = () => { try { return localStorage.getItem(HINT_KEY) === '1'; } catch (e) { return false; } };
+  function hideToggleHint() {
+    clearTimeout(hintTimer);
+    toggleEl.classList.remove('is-hinting');
+    hintEl.classList.remove('is-on');
+  }
+  function showToggleHint() {
+    if (hintSeen()) return;
+    hintEl.textContent = site.toggleHint || '';
+    hintTimer = setTimeout(() => {
+      toggleEl.classList.add('is-hinting');
+      if (site.toggleHint) hintEl.classList.add('is-on');
+      hintTimer = setTimeout(hideToggleHint, 5600);
+    }, reducedMotion.matches ? 300 : 1300);
+  }
+  toggleEl.addEventListener('click', () => {
+    hideToggleHint();
+    try { localStorage.setItem(HINT_KEY, '1'); } catch (e) { /* 저장할 수 없으면 다음에도 안내합니다 */ }
+  });
 
   /* 입장 화면 어디를 눌러도, 키보드 Enter나 스페이스로도 들어갑니다.
      처음부터 버튼에 포커스를 주면 금빛 테두리가 생겨 버튼처럼 보이므로 주지 않습니다. */
