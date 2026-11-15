@@ -34,22 +34,30 @@ const ASSETS = {
     { src: 'assets/images/city/tower-2.webp', night: 'assets/images/city/tower-2-night.webp', left: 41.5, bottom: 11, width: 2.8, edge: 'line' },
     { src: 'assets/images/city/pagoda-3.webp', night: 'assets/images/city/pagoda-3-night.webp', left: 58, bottom: 12, width: 10, edge: 'line' },
     { src: 'assets/images/city/tower-3.webp', night: 'assets/images/city/tower-3-night.webp', left: 63.5, bottom: 13, width: 6.5, edge: 'line' },
+    /* 귀신(밤에만 보임). 오른쪽 홀쭉한 건물 뒤에서 비쳐 나옵니다. */
+    { src: 'assets/images/saeki/ghost.webp', left: 76, bottom: 11, width: 5.5, nightOnly: true, tone: 'brightness(.8)' },
     { src: 'assets/images/city/cluster-3.webp', night: 'assets/images/city/cluster-3-night.webp', left: 71, bottom: 4, width: 16, flip: true, edge: 'line' },
+    /* 안개 1: 먼 스카이라인과 뒷줄을 하늘빛으로 흐립니다. */
+    { mist: .42, height: 52 },
     /* 가운뎃줄 */
-    /* 삿된 것(밤에만 보임). 뒷줄 앞, 가운뎃줄 뒤에 숨어 고개만 내밉니다. tone은 밤빛에 맞춘 색 보정입니다. */
-    { src: 'assets/images/saeki/black-cat.webp', left: 67, bottom: 13.5, width: 10, flip: true, nightOnly: true },
     { src: 'assets/images/city/block-7.webp', night: 'assets/images/city/block-7-night.webp', left: 79.5, bottom: 4, width: 10, flip: true, edge: 'line' },
     { src: 'assets/images/city/cluster-3.webp', night: 'assets/images/city/cluster-3-night.webp', left: 25, bottom: 4, width: 23.8, edge: 'line' },
     { src: 'assets/images/city/block-2.webp', night: 'assets/images/city/block-2-night.webp', left: 52, bottom: 3, width: 12.6, edge: 'line' },
+    /* 검은 고양이(밤에만 보임). 타워 옆 앞줄 아파트 무리 바로 뒤에서 몸을 내밉니다. */
+    { src: 'assets/images/saeki/black-cat.webp', left: 55.5, bottom: 4, width: 11, flip: true, nightOnly: true },
+    /* 안개 2: 가운뎃줄까지 한 번 더 옅게 덮습니다. 이 아래 건물은 안개 앞에 섭니다. */
+    { mist: .26, height: 40 },
     { src: 'assets/images/city/cluster-2.webp', night: 'assets/images/city/cluster-2-night.webp', left: 59, bottom: 0, width: 19.6, edge: true },
     { src: 'assets/images/city/block-2.webp', night: 'assets/images/city/block-2-night.webp', left: 47, bottom: 6, width: 9.5, edge: 'line' },
     { src: 'assets/images/city/tower-1.webp', night: 'assets/images/city/tower-1-night.webp', left: 50.5, bottom: 0, width: 9.6, edge: true },
     /* 뿔 달린 도깨비(밤에만 보임). 앞줄 건물 바로 뒤에 두어 아랫단을 가립니다. */
-    { src: 'assets/images/saeki/horned.webp', left: 22.5, bottom: 10, width: 10, nightOnly: true, tone: 'brightness(.55) saturate(.7)' },
+    { src: 'assets/images/saeki/horned.webp', left: 34, bottom: 8, width: 10, nightOnly: true, tone: 'brightness(.55) saturate(.7)' },
     /* 앞줄 */
     { src: 'assets/images/city/block-7.webp', night: 'assets/images/city/block-7-night.webp', left: 7, bottom: -3, width: 13, edge: true },
     { src: 'assets/images/city/block-7.webp', night: 'assets/images/city/block-7-night.webp', left: 19.5, bottom: -1.1, width: 12.6, edge: true },
     { src: 'assets/images/city/cluster-2.webp', night: 'assets/images/city/cluster-2-night.webp', left: 26, bottom: 0, width: 16.8, flip: true, edge: true },
+    /* 심마(밤에만 보임). 왼쪽 앞산 옆에서 피어오릅니다. 그림의 잘린 왼쪽 면은 앞산 뒤로 숨깁니다. */
+    { src: 'assets/images/saeki/cloud-cat.webp', left: 19, bottom: -4, width: 10, nightOnly: true },
     { src: 'assets/images/city/pagoda-1.webp', night: 'assets/images/city/pagoda-1-night.webp', left: 37.5, bottom: 0, width: 20, edge: true }
   ],
   /* 앞산과 구름 둑. 구름 둑은 도시 양옆 밑동과 앞산의 잘린 끝을 가립니다. */
@@ -158,6 +166,16 @@ function piecesFor(key) {
 }
 
 async function paintPiece(key, spec) {
+  /* 안개: 그림 없이 하늘빛 띠를 한 겹 깝니다. 이 줄보다 앞(목록 위쪽)에 적힌 건물만 안개에 덮입니다.
+     mist: 아래쪽 진하기, height: 무대 아래에서부터의 높이(%). 위로 갈수록 옅어져 사라집니다. */
+  if (spec.mist !== undefined) {
+    const mist = document.createElement('div');
+    mist.className = 'mist';
+    mist.style.setProperty('--mist', spec.mist);
+    mist.style.height = `${spec.height}%`;
+    return mist;
+  }
+
   const placed = spec.width !== undefined;
   const piece = document.createElement('div');
   piece.className = placed ? 'piece piece--placed' : 'piece';

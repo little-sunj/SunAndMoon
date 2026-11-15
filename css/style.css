@@ -221,22 +221,63 @@ body {
    edge: 'line' → 뒷줄·가운뎃줄용. 금선 + 옅은 그림자. 뒤로 갈수록 덜 또렷해야 앞뒤 깊이가 살아나요. */
 .piece.has-edge {
   --edge-line: calc(var(--stage-w) * .0006);   /* 금선 굵기 */
-  --edge-shadow: calc(var(--stage-w) * .007);  /* 그림자 번짐 */
+  --edge-shadow: calc(var(--stage-w) * .005);  /* 그림자 번짐 */
+  --edge-drop: calc(var(--stage-w) * .0015);   /* 그림자를 살짝 아래로: 위쪽 하늘에 번지는 테두리를 줄입니다 */
   filter:
     drop-shadow(0 0 var(--edge-line) rgb(226 178 92 / .9))
-    drop-shadow(0 0 var(--edge-shadow) rgb(6 16 30 / .7));
+    drop-shadow(0 var(--edge-drop) var(--edge-shadow) rgb(6 16 30 / .45));
 }
 .piece.has-edge--line {
-  --edge-shadow: calc(var(--stage-w) * .003);
+  --edge-shadow: calc(var(--stage-w) * .0025);
   filter:
     drop-shadow(0 0 var(--edge-line) rgb(226 178 92 / .75))
-    drop-shadow(0 0 var(--edge-shadow) rgb(6 16 30 / .45));
+    drop-shadow(0 var(--edge-drop) var(--edge-shadow) rgb(6 16 30 / .3));
 }
 /* 앞산: 그림에 금빛 윤곽선이 이미 있으니 그림자만 둘러, 맨 앞에서 도시와 떨어져 보이게 합니다. */
 .piece.has-edge--shadow {
-  --edge-shadow: calc(var(--stage-w) * .009);
-  filter: drop-shadow(0 0 var(--edge-shadow) rgb(6 16 30 / .75));
+  --edge-shadow: calc(var(--stage-w) * .006);
+  --edge-drop: calc(var(--stage-w) * .002);
+  filter: drop-shadow(0 var(--edge-drop) var(--edge-shadow) rgb(6 16 30 / .45));
 }
+
+/* 도시 안개: 줄 사이에 하늘빛 띠를 깔아, 뒤에 있는 건물일수록 여러 겹 덮여 흐려지게 합니다.
+   낮 안개(::before)와 밤 안개(::after)를 겹쳐 두고, 도시가 낮↔밤으로 바뀌는 구간에 맞춰 서로 바꿔 보여 줍니다.
+   색은 --mist-day / --mist-night, 진하기는 scene.js의 mist 값(밤은 --mist-night-k를 곱한 값)으로 조절합니다. */
+.layer--city {
+  --mist-day: 200 218 200;     /* 낮: 지평선 근처 하늘빛(민트) */
+  --mist-night: 66 88 124;     /* 밤: 지평선 근처 밤하늘빛(남색) */
+  --mist-night-k: 1;
+}
+.mist {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  pointer-events: none;
+}
+.mist::before,
+.mist::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  transition: opacity calc(var(--dur) * var(--swap-len)) ease-in-out calc(var(--dur) * var(--swap-start));
+}
+.mist::before {
+  background: linear-gradient(to top,
+    rgb(var(--mist-day) / var(--mist)) 0%,
+    rgb(var(--mist-day) / calc(var(--mist) * .7)) 55%,
+    rgb(var(--mist-day) / 0) 100%);
+}
+.mist::after {
+  --k: calc(var(--mist) * var(--mist-night-k));
+  background: linear-gradient(to top,
+    rgb(var(--mist-night) / var(--k)) 0%,
+    rgb(var(--mist-night) / calc(var(--k) * .7)) 55%,
+    rgb(var(--mist-night) / 0) 100%);
+  opacity: 0;
+}
+[data-phase="night"] .mist::before { opacity: 0; }
+[data-phase="night"] .mist::after { opacity: 1; }
 
 /* 밤에만 나타나는 삿된 것: 도시가 밤으로 바뀌는 구간에 맞춰 서서히 나타나고 사라집니다. */
 .piece.is-night-only {
