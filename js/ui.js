@@ -125,9 +125,83 @@
   let returnFocus = null;
   let closing = false;
 
-  const paragraphs = (list) => list.map((text) => `<p>${text}</p>`).join('');
-  const sections = (list = []) => list.map((section) => `
-    <section><h3>${section.heading}</h3>${paragraphs(section.body)}</section>`).join('');
+  const paragraphs = (list = []) => [].concat(list).map((text) => `<p>${text}</p>`).join('');
+  const heading = (text) => (text ? `<h3>${text}</h3>` : '');
+  const lines = (list = []) => [].concat(list).join('<br>');
+
+  /* content.js의 블록(type)마다 그리는 방법 */
+  const BLOCKS = {
+    text: (b) => `<section>${heading(b.heading)}${paragraphs(b.body)}</section>`,
+
+    verse: (b) => `<div class="verse">${b.stanzas.map((stanza) => {
+      const s = Array.isArray(stanza) || typeof stanza === 'string' ? { lines: [].concat(stanza) } : stanza;
+      const tone = s.tone ? ` verse__stanza--${s.tone}` : '';
+      const inner = s.tone === 'fade'
+        ? s.lines.map((line) => `<span>${line}</span>`).join('')
+        : lines(s.lines);
+      return `<p class="verse__stanza${tone}">${inner}</p>`;
+    }).join('')}</div>`,
+
+    callout: (b) => `<p class="callout">${lines(b.lines)}</p>`,
+
+    facts: (b) => `<section>${heading(b.heading)}<dl class="facts">${b.items.map(([k, v]) => `
+      <div><dt>${k}</dt><dd>${v}</dd></div>`).join('')}</dl></section>`,
+
+    looks: (b) => `<section>${heading(b.heading)}<div class="looks">${b.items.map((look) => `
+      <div class="look${look.accent ? ' look--accent' : ''}">
+        <p class="look__swatches" aria-hidden="true">${(look.swatches || []).map((c) => `<i style="background:${c}"></i>`).join('')}</p>
+        <p class="look__title">${look.title}</p>
+        <p class="look__body">${look.body}</p>
+      </div>`).join('')}</div>${b.note ? `<p class="note">${b.note}</p>` : ''}</section>`,
+
+    quotes: (b) => `<section>${heading(b.heading)}<ul class="quotes">${b.items.map((q) => {
+      const item = typeof q === 'string' ? { text: q } : q;
+      return `<li>${item.note ? `<span class="quotes__note">${item.note}</span>` : ''}<span class="quotes__text">“${item.text}”</span></li>`;
+    }).join('')}</ul></section>`,
+
+    hours: (b) => `<section>${heading(b.heading)}<ol class="hours">${b.items.map((h) => `
+      <li${h.on ? ' class="is-on"' : ''}><span lang="zh-Hant">${h.hanja}</span>${h.name}</li>`).join('')}</ol>${b.body ? `<p>${b.body}</p>` : ''}</section>`,
+
+    grid: (b) => `<section>${heading(b.heading)}${b.body ? `<p>${b.body}</p>` : ''}<div class="duties">${b.items.map((d) => `
+      <div><p class="duties__name">${d.name}</p><p>${d.body}</p></div>`).join('')}</div></section>`,
+
+    moons: (b) => `<ol class="moons">${b.items.map((m) => `
+      <li class="${m.on ? 'is-on' : ''}"><i class="moon-phase moon-phase--${m.phase}" aria-hidden="true"></i>${m.name}</li>`).join('')}</ol>`,
+
+    chips: (b) => `<section>${heading(b.heading)}<ul class="chips">${b.items.map((c) => `<li>${c}</li>`).join('')}</ul></section>`,
+
+    kinds: (b) => `<dl class="kinds">${b.items.map((kind, i) => {
+      const art = kind.image ? `<img class="kind__art" src="${kind.image}" alt="" loading="lazy">` : '';
+      const side = kind.image ? ` kind--art${i % 2 ? ' kind--right' : ''}` : '';
+      return `
+      <div class="kind${side}"><dt>${art}<span class="kind__name">${kind.name}<span>${kind.hanja}</span></span></dt><dd>${kind.body}</dd></div>`;
+    }).join('')}</dl>`,
+
+    roster: (b) => `<div class="roster">${b.groups.map((g) => `
+      <section class="roster__group">
+        <h3>${g.hanja ? `<span lang="zh-Hant">${g.hanja}</span>` : ''}${g.name}</h3>
+        <dl>${g.items.map((it) => `<div><dt>${it.name}</dt><dd>${it.body}</dd></div>`).join('')}</dl>
+      </section>`).join('')}</div>`,
+
+    cards: (b) => `<section>${heading(b.heading)}<div class="cards">${b.items.map((c) => `
+      <article class="card">
+        <p class="card__name">${c.name}${c.hanja ? `<span lang="zh-Hant">${c.hanja}</span>` : ''}</p>
+        ${c.tag ? `<p class="card__tag">${c.tag}</p>` : ''}
+        ${paragraphs(c.body)}
+        ${c.quotes ? `<ul class="card__quotes">${c.quotes.map((q) => `<li>“${q}”</li>`).join('')}</ul>` : ''}
+      </article>`).join('')}</div></section>`,
+
+    teaser: (b) => `<div class="teaser"><p class="teaser__mark" lang="zh-Hant" aria-hidden="true">${b.mark}</p>
+      <p>${b.body}</p>${b.quote ? `<p class="teaser__quote">${b.quote}</p>` : ''}</div>`
+  };
+  const blocks = (list = []) => list.map((b) => (BLOCKS[b.type] || BLOCKS.text)(b)).join('');
+
+  /* 메뉴 안 탭. key는 data-open 값이 됩니다. */
+  const tabsHtml = (items, current, label) => `<div class="tabs" role="group" aria-label="${label}">${items.map(({ key, label: text }) => `
+      <button type="button" data-open="${key}" aria-pressed="${key === current}">${text}</button>`).join('')}</div>`;
+  const header = (page) => `${page.eyebrow ? `<p class="eyebrow" lang="zh-Hant" aria-hidden="true">${page.eyebrow}</p>` : ''}
+      <h2 id="sheet-title">${page.title}</h2>${page.lead ? `<p class="lead">${page.lead}</p>` : ''}`;
+  const credit = () => (site.credit ? `<p class="credit">${site.credit}</p>` : '');
 
   function mediaHtml(item) {
     if (item.type === 'video') {
@@ -182,28 +256,27 @@
     });
   }
 
-  function renderWorld() {
-    const world = site.world;
-    return `<h2 id="sheet-title">${world.title}</h2>
-      <p class="lead">${world.lead}</p>${sections(world.sections)}`;
+  /* 세계관·삿된 것: 탭 하나를 그립니다. key는 'world/night' 꼴. */
+  function renderMenu(menuId, key) {
+    const menu = site[menuId];
+    const tab = menu.tabs.find((t) => `${menuId}/${t.id}` === key) || menu.tabs[0];
+    const items = menu.tabs.map((t) => ({ key: `${menuId}/${t.id}`, label: t.label }));
+    return `${tabsHtml(items, `${menuId}/${tab.id}`, `${menu.title} 고르기`)}
+      <div class="page page--${menuId}-${tab.id}">${header(tab)}${blocks(tab.blocks)}</div>${credit()}`;
   }
 
-  function renderSaeki() {
-    const saeki = site.saeki;
-    const kinds = saeki.kinds.map((kind, i) => {
-      const art = kind.image ? `<img class="kind__art" src="${kind.image}" alt="" loading="lazy">` : '';
-      const side = kind.image ? ` kind--art${i % 2 ? ' kind--right' : ''}` : '';
-      return `
-      <div class="kind${side}"><dt>${art}<span class="kind__name">${kind.name}<span>${kind.hanja}</span></span></dt><dd>${kind.body}</dd></div>`;
-    }).join('');
-    return `<h2 id="sheet-title">${saeki.title}</h2>
-      <p class="lead">${saeki.lead}</p><dl class="kinds">${kinds}</dl>`;
+  /* 인물 메뉴의 탭: 소백 · 염희 · 주변 인물 */
+  const peopleTabs = (current) => tabsHtml([
+    ...Object.entries(site.characters).map(([key, p]) => ({ key, label: p.name })),
+    ...(site.people ? [{ key: 'people', label: site.people.label }] : [])
+  ], current, '인물 고르기');
+
+  function renderPeople() {
+    return `${peopleTabs('people')}<div class="page page--people">${header(site.people)}${blocks(site.people.blocks)}</div>${credit()}`;
   }
 
   function renderCharacter(id) {
     const person = site.characters[id];
-    const tabs = Object.entries(site.characters).map(([key, other]) => `
-      <button type="button" data-open="${key}" aria-pressed="${key === id}">${other.name}</button>`).join('');
     const gallery = person.gallery.length > 1 ? `
       <div class="gallery" role="group" aria-label="${person.name} 그림 고르기">
         ${person.gallery.map((item, i) => `
@@ -214,16 +287,18 @@
     const cta = id === 'soback' && site.bloomUrl ? `
       <a class="button button--primary cta" href="${site.bloomUrl}" target="_blank" rel="noopener">소백과 대화하기</a>` : '';
 
-    return `<div class="tabs" role="group" aria-label="인물 고르기">${tabs}</div>
-      <h2 id="sheet-title">${person.name}</h2>
+    return `${peopleTabs(id)}
+      <h2 id="sheet-title">${person.name}${person.hanja ? `<span class="hanja" lang="zh-Hant">${person.hanja}</span>` : ''}</h2>
       <p class="role">${person.role}</p>
       <p class="lead">${person.lead}</p>
       <blockquote>${person.quote}</blockquote>
       ${person.place ? `<section class="place">${person.place.image ? `<img class="place__bg" src="${person.place.image}" alt="" loading="lazy">` : ''}<h3><span lang="zh-Hant">${person.place.hanja}</span>${person.place.name}</h3>${paragraphs(person.place.body)}</section>` : ''}
-      ${sections(person.sections)}${gallery}${cta}`;
+      ${blocks(person.blocks)}${gallery}${cta}${credit()}`;
   }
 
+  /* view: 'soback' · 'yeomhee' · 'people' · 'world' · 'world/night' · 'saeki/named' … */
   function render(view) {
+    const [menuId] = view.split('/');
     const person = site.characters[view];
     sheet.dataset.current = view;
     if (person) {
@@ -232,7 +307,7 @@
       sheet.dataset.view = 'person';
       window.Scene.goTo(person.phase);
     } else {
-      body.innerHTML = view === 'saeki' ? renderSaeki() : renderWorld();
+      body.innerHTML = menuId === 'people' ? renderPeople() : renderMenu(site[menuId] ? menuId : 'world', view);
       buildArt(null);
       sheet.dataset.view = 'text';
     }
@@ -241,10 +316,10 @@
 
   function open(view, trigger) {
     Music.close();
-    /* 소개 창 안의 인물 탭은 다시 그려지므로, 새로 그린 같은 탭으로 포커스를 옮깁니다. */
+    /* 소개 창 안의 탭은 다시 그려지므로, 새로 그린 같은 탭으로 포커스를 옮깁니다. */
     const fromTab = sheet.open && trigger && trigger.closest('.tabs');
     render(view);
-    if (fromTab) body.querySelector(`.tabs [data-open="${view}"]`)?.focus();
+    if (fromTab) body.querySelector('.tabs [aria-pressed="true"]')?.focus();
     if (sheet.open) return;
     returnFocus = trigger || document.activeElement;
     closing = false;

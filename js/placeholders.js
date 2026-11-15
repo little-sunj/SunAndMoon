@@ -1,7 +1,7 @@
 /*
- * 임시 도형 모음입니다. 진짜 이미지로 모두 교체하면 이 파일과
- * index.html의 <script> 한 줄을 지워도 됩니다.
- * 좌표계는 모든 레이어 공통으로 가로 1800, 세로 1200입니다.
+ * 임시 도형 모음. 진짜 이미지로 모두 교체하면 이 파일과
+ * index.html의 <script> 한 줄을 지워도 됨.
+ * 좌표계는 모든 레이어 공통으로 가로 1800, 세로 1200.
  */
 (function () {
   const VIEW = 'width="1800" height="1200" viewBox="0 0 1800 1200" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg"';
@@ -37,7 +37,7 @@
     };
   }
 
-  /* 도시: 건물과 창문 좌표를 함께 만들어 불빛이 창문 자리에 오게 합니다. */
+  /* 도시: 건물과 창문 좌표를 함께 만들어 불빛이 창문 자리에 오게 함. */
   const CITY = { left: 540, top: 760, width: 720, height: 300 };
   const random = rng(11);
   const windows = [];

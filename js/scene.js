@@ -3,9 +3,9 @@
  * - ''        : 임시 도형
  * - null      : 비워 둠
  * - '경로'    : 3:2 캔버스를 꽉 채우는 이미지 한 장
- * - [ {...} ] : 무대 위에 놓는 조각 이미지들. 뒤에 적은 조각이 앞에 그려집니다.
+ * - [ {...} ] : 무대 위에 놓는 조각 이미지들. 뒤에 적은 조각이 앞에 그려짐.
  *     left, bottom : 무대 왼쪽 아래 모서리에서 떨어진 거리(무대 너비·높이의 %)
- *     width        : 무대 너비 대비 %. 높이는 이미지 비율대로 정해집니다.
+ *     width        : 무대 너비 대비 %. 높이는 이미지 비율대로 정해짐.
  *     flip         : true면 좌우를 뒤집습니다.
  *     night        : 직접 보정한 밤 이미지 경로(선택)
  */
@@ -18,7 +18,7 @@ const ASSETS = {
   farPeaks: [
     { src: 'assets/images/scenery/far-band.webp', left: 0, bottom: 10, width: 100 }
   ],
-  mainPeaks: null,   /* 중간 봉우리(mid-spires.webp)는 빼서 단\원본\sunandmoon-미사용에 두었습니다. */
+  mainPeaks: null,   /* 중간 봉우리(mid-spires.webp)는 뺌. */
   midClouds: null,
   /* 도시: 뒤에서 앞 순서로 적습니다. night는 창문에 불을 켠 밤 그림입니다.
      가운데 건물의 밑동은 파도가, 양옆 건물의 밑동은 앞 구름이 가립니다. */

@@ -613,13 +613,20 @@
   letter-spacing: .12em;
 }
 
-/* 인물 고르기 */
+/* 메뉴 안 탭(인물 · 세계관 · 삿된 것). 칸이 모자라면 옆으로 밀어 봅니다. */
 .tabs {
   display: flex;
   gap: .25rem;
   margin: 0 0 1.75rem;
+  border-bottom: 1px solid var(--paper-line);
+  overflow-x: auto;
+  scrollbar-width: none;
 }
+.tabs::-webkit-scrollbar { display: none; }
 .tabs button {
+  flex: none;
+  white-space: nowrap;
+  margin-bottom: -1px;
   min-height: 44px;
   padding: .4rem .9rem;
   border: 0;
@@ -777,6 +784,236 @@
 }
 @keyframes gate-breathe {
   50% { opacity: .45; }
+}
+
+/* ── 소개 창의 글 블록 (content.js의 type) ───────────── */
+/* 그림이 없는 글 창(세계관 · 삿된 것 · 주변 인물)은 패널을 조금 넓게 씁니다. */
+.sheet[data-view="text"] { --panel-w: clamp(400px, 46vw, 680px); }
+
+.sheet__body .eyebrow {
+  margin: 0 0 .35rem;
+  color: var(--paper-accent);
+  font-size: .75rem;
+  letter-spacing: .5em;
+  opacity: .85;
+}
+.sheet__body h2 .hanja {
+  margin-left: .6rem;
+  color: var(--paper-muted);
+  font-size: 1rem;
+  font-weight: 400;
+  letter-spacing: .1em;
+}
+.sheet__body section > h3:first-child { margin-top: 2.25rem; }
+.sheet__body strong { color: var(--paper-text); font-weight: 700; }
+.sheet__body .note {
+  margin: 1rem 0 0;
+  color: var(--paper-muted);
+  font-size: .9375rem;
+  text-align: center;
+}
+.credit {
+  margin: 3.5rem 0 0 !important;
+  max-width: none !important;
+  color: var(--paper-muted);
+  font-size: .75rem !important;
+  text-align: right;
+  opacity: .75;
+}
+
+/* 배경 이야기: 왼쪽 정렬 시 */
+.verse { margin: 1.5rem 0 0; text-align: left; }
+.sheet__body .verse__stanza {
+  max-width: none;
+  margin: 0 0 1.9rem;
+  line-height: 2.1;
+  color: var(--paper-muted);
+}
+.sheet__body .verse__stanza--quote {
+  color: var(--paper-text);
+  font-size: 1.1875rem;
+  font-weight: 700;
+}
+.sheet__body .verse__stanza--strong { color: var(--paper-text); font-weight: 700; }
+.sheet__body .verse__stanza--callout,
+.sheet__body .callout {
+  margin: 2.6rem 0;
+  color: var(--paper-accent);
+  font-size: 1.0625rem;
+  font-weight: 700;
+  line-height: 2;
+  text-align: center;
+}
+.sheet__body .callout { max-width: none; margin: 2.25rem 0; }
+.sheet__body .verse .verse__stanza--callout { text-align: left; }
+.sheet__body .callout strong { color: inherit; }
+.verse__stanza--fade span { display: block; color: var(--paper-text); }
+.verse__stanza--fade span:nth-child(2) { opacity: .7; }
+.verse__stanza--fade span:nth-child(3) { opacity: .4; }
+.sheet__body .verse__stanza--end {
+  margin-top: 2.6rem;
+  color: var(--paper-text);
+  font-size: 1.0625rem;
+  font-weight: 700;
+}
+
+/* 인물 정보 표 */
+.facts { margin: 0; }
+.facts > div {
+  display: flex;
+  gap: 1rem;
+  padding: .55rem .25rem;
+  border-bottom: 1px solid var(--paper-line);
+}
+.facts dt { flex: 0 0 4.5rem; color: var(--paper-accent); }
+.facts dd { margin: 0; }
+
+/* 외형 카드 */
+.looks { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.look {
+  padding: 1rem .9rem;
+  border: 1px solid var(--paper-line);
+  border-radius: 4px;
+  text-align: center;
+}
+.sheet__body .look p { max-width: none; margin: 0; }
+.look__swatches { display: flex; justify-content: center; gap: 6px; margin-bottom: .6rem !important; }
+.look__swatches i {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  box-shadow: 0 0 0 1px var(--paper-line);
+}
+.sheet__body .look__title { margin-bottom: .25rem; font-weight: 700; }
+.look--accent .look__title { color: var(--paper-accent); }
+.sheet__body .look__body { font-size: .875rem; line-height: 1.75; color: var(--paper-muted); }
+
+/* 말버릇 */
+.quotes { margin: 0; padding: 0; list-style: none; }
+.quotes li {
+  padding: .7rem 0 .7rem 1rem;
+  border-left: 2px solid var(--paper-line);
+}
+.quotes li + li { margin-top: .4rem; }
+.quotes__note { display: block; color: var(--paper-muted); font-size: .8125rem; }
+.quotes__text { font-size: 1.0625rem; }
+
+/* 시진 띠 */
+.hours {
+  display: flex;
+  margin: .25rem 0 1rem;
+  padding: 0;
+  list-style: none;
+  border-block: 1px solid var(--paper-line);
+}
+.hours li {
+  flex: 1;
+  padding: .7rem 0;
+  color: var(--paper-muted);
+  font-size: .75rem;
+  line-height: 1.5;
+  text-align: center;
+}
+.hours li span { display: block; font-size: 1.0625rem; }
+.hours li.is-on { color: var(--paper-accent); background: rgb(217 162 63 / .12); }
+
+/* 달지기가 하는 일 */
+.duties {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 1rem 1.25rem;
+  margin-top: 1rem;
+}
+.duties > div { padding-top: .6rem; border-top: 1px solid var(--paper-line); }
+.sheet__body .duties p { margin: 0; font-size: .875rem; line-height: 1.75; color: var(--paper-muted); }
+.sheet__body .duties .duties__name { color: var(--paper-accent); font-size: 1rem; font-weight: 700; }
+
+/* 달의 모양 */
+.moons {
+  display: flex;
+  justify-content: center;
+  gap: clamp(14px, 4vw, 28px);
+  margin: 1.75rem 0 .5rem;
+  padding: 0;
+  list-style: none;
+  font-size: .8125rem;
+  text-align: center;
+  color: var(--paper-muted);
+}
+.moons li { opacity: .5; }
+.moons li.is-on { opacity: 1; color: var(--paper-accent); font-weight: 700; }
+.moon-phase {
+  --lit: var(--paper-text);
+  display: block;
+  width: 18px;
+  height: 18px;
+  margin: 0 auto .35rem;
+  border-radius: 50%;
+  box-sizing: border-box;
+}
+.moon-phase--crescent { box-shadow: inset -5px 0 0 var(--lit); }
+.moon-phase--first { background: linear-gradient(90deg, transparent 50%, var(--lit) 50%); box-shadow: 0 0 0 1px var(--paper-line); }
+.moon-phase--full { background: #e6d6a8; box-shadow: 0 0 10px rgb(230 214 168 / .7); }
+.moon-phase--last { background: linear-gradient(90deg, var(--lit) 50%, transparent 50%); box-shadow: 0 0 0 1px var(--paper-line); }
+.moon-phase--new { border: 1px solid var(--geumbak); }
+
+/* 짧은 낱말 목록 */
+.chips { display: flex; flex-wrap: wrap; gap: 6px; margin: 0; padding: 0; list-style: none; }
+.chips li {
+  padding: .2rem .7rem;
+  border: 1px solid var(--paper-line);
+  border-radius: 99px;
+  font-size: .875rem;
+}
+
+/* 갈래별 이름 목록 */
+.roster__group h3 { display: flex; align-items: baseline; gap: .5rem; }
+.roster__group h3 span { font-size: 1.125rem; }
+.roster dl { margin: 0; }
+.roster dl > div { padding: .55rem 0; border-bottom: 1px solid var(--paper-line); }
+.roster dt { font-weight: 700; }
+.roster dd { margin: .1rem 0 0; color: var(--paper-muted); font-size: .9375rem; line-height: 1.75; }
+
+/* 이름 있는 존재 카드 */
+.cards { display: grid; gap: 14px; }
+/* 제목 없이 바로 시작하는 카드 묶음(이름 있는 것들)은 위 글과 띄웁니다. */
+.sheet__body section > .cards:first-child { margin-top: 2rem; }
+.card {
+  padding: 1.1rem 1.25rem .4rem;
+  border: 1px solid var(--paper-line);
+  border-top: 2px solid var(--geumbak);
+  border-radius: 2px;
+}
+.sheet__body .card p { margin-bottom: .6rem; font-size: .9375rem; }
+.sheet__body .card .card__name {
+  margin: 0;
+  font-size: 1.1875rem;
+  font-weight: 700;
+  letter-spacing: .04em;
+}
+.card__name span { margin-left: .5rem; color: var(--paper-accent); font-size: .9375rem; font-weight: 400; letter-spacing: .12em; }
+.sheet__body .card .card__tag { margin: .1rem 0 .7rem; color: var(--paper-muted); font-size: .8125rem; }
+.card__quotes { margin: 0 0 .9rem; padding: 0; list-style: none; }
+.card__quotes li {
+  padding-left: .8rem;
+  border-left: 2px solid var(--paper-line);
+  color: var(--paper-muted);
+  font-size: .9375rem;
+  line-height: 1.8;
+}
+.card__quotes li + li { margin-top: .3rem; }
+
+/* 호랑이 소문 */
+.teaser { margin: 3rem 0 0; text-align: center; }
+.sheet__body .teaser p { max-width: none; color: var(--paper-muted); }
+.sheet__body .teaser__mark { margin: 0 0 .6rem; color: #a8473c; font-size: 2.25rem; line-height: 1; }
+.sheet__body .teaser__quote { margin-top: 1.5rem; color: #a8473c; font-size: 1.0625rem; font-weight: 700; }
+[data-phase="night"] .sheet__body .teaser__quote { color: #d06a5c; }
+[data-phase="night"] .sheet__body .teaser__mark { color: #c45a4c; }
+
+@media (max-width: 600px) {
+  .looks { grid-template-columns: 1fr; }
+  .tabs button { padding: .4rem .7rem; font-size: .9375rem; }
 }
 
 /* 휴대폰: 그림은 위, 글은 아래에서 올라옵니다. */
